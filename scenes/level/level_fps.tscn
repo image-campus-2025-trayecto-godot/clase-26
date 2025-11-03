@@ -1,9 +1,10 @@
-[gd_scene load_steps=30 format=3 uid="uid://d32go3mt62d31"]
+[gd_scene load_steps=31 format=3 uid="uid://d32go3mt62d31"]
 
 [ext_resource type="Texture2D" uid="uid://b5tw0gu0i625b" path="res://assets/GreyboxTextures/GreyboxTextures/greybox_blue_grid.png" id="1_bcixf"]
 [ext_resource type="Script" uid="uid://b7svhf7f5emr1" path="res://scenes/level/level.gd" id="1_scyvi"]
 [ext_resource type="Script" uid="uid://dwchvephx0gb6" path="res://scenes/fly_mode_camera.gd" id="4_wx0nk"]
 [ext_resource type="PackedScene" uid="uid://dqcgkdrx4yu5y" path="res://addons/input-overlay/overlay-widget/overlay-widget.tscn" id="5_45t5u"]
+[ext_resource type="Script" uid="uid://cmtkhuebtueov" path="res://scenes/player/weapon/weapon_controller.gd" id="5_jwyb7"]
 [ext_resource type="Script" uid="uid://cm6bvjjhychqi" path="res://scenes/level/player_fps.gd" id="5_scyvi"]
 [ext_resource type="PackedScene" uid="uid://cnwc6idbd5no6" path="res://scenes/level/props/barrel.tscn" id="6_jwyb7"]
 [ext_resource type="Script" uid="uid://cru8pmyng1url" path="res://scenes/level/crosshair.gd" id="7_wx0nk"]
@@ -383,9 +384,9 @@ transform = Transform3D(0.999909, 0.0005169482, -0.013481079, -0.00080292136, 0.
 collision_mask = 2147483650
 script = ExtResource("5_scyvi")
 weapon_mode = 0
-bullet_impulse = 500.0
 fire_rate = 50.0
-shoot_impulse = 2.0
+shoot_impulse = 1.0
+bullet_impulse = 5.0
 
 [node name="CameraPivot" type="Node3D" parent="PlayerFPS"]
 unique_name_in_owner = true
@@ -397,6 +398,10 @@ current = true
 
 [node name="WeaponPivot" type="Node3D" parent="PlayerFPS/CameraPivot/PlayerCamera"]
 transform = Transform3D(0.99891055, 0.0149588445, -0.04421124, -0.010086867, 0.9940525, 0.108434185, 0.045570325, -0.10787, 0.99312073, 0.15790828, -0.28491816, -0.28577396)
+
+[node name="WeaponController" type="Node3D" parent="PlayerFPS/CameraPivot/PlayerCamera/WeaponPivot"]
+transform = Transform3D(0.99999994, -1.8626451e-09, 3.7252903e-09, -1.8626451e-09, 0.99999994, -2.9802322e-08, -3.7252903e-09, 0, 0.9999999, 0, 0, 0)
+script = ExtResource("5_jwyb7")
 
 [node name="WeaponPivotAnimationPlayer" type="AnimationPlayer" parent="PlayerFPS/CameraPivot/PlayerCamera/WeaponPivot"]
 libraries = {

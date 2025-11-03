@@ -8,22 +8,26 @@ enum WeaponMode {
 	SemiAutomatic
 }
 
-@export var weapon_mode: WeaponMode = WeaponMode.SemiAutomatic
-@export var doom_mode_enabled: bool = false
-@export var bullet_impulse: float = 100.0
 enum ShootMode {
 	RIGID_BODY,
 	HITSCAN
 }
-@export var fire_rate: float = 10
+
+@export var doom_mode_enabled: bool = false
 @export var camera_fov_while_sprinting: float = 90
-@export var shoot_mode: ShootMode = ShootMode.HITSCAN
-@export var shoot_impulse: float = 20.0
 @export var SPEED: float = 5.0
 @export var SPRINT_SPEED: float = 8.0
 @export var JUMP_VELOCITY: float = 4.5
-@export var max_recoil_angle: float = PI / 10
+
 @export_range(0.01, 1.0, 0.01) var mouse_sensitivity: float = 0.15
+@export_category("Weapon")
+@export var weapon_mode: WeaponMode = WeaponMode.SemiAutomatic
+@export var fire_rate: float = 10
+@export var shoot_mode: ShootMode = ShootMode.HITSCAN
+@export var shoot_impulse: float = 20.0
+@export var max_recoil_angle: float = PI / 10
+@export var bullet_impulse: float = 100.0
+
 var _mouse_motion: Vector2
 var movement_enabled: bool = true
 @onready var camera_3d: Camera3D = %PlayerCamera
