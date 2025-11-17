@@ -1,0 +1,63 @@
+[gd_scene load_steps=9 format=3 uid="uid://b823pjdgjn6uy"]
+
+[ext_resource type="Script" uid="uid://c7ujl3gj8qlwq" path="res://scenes/player/weapon/weapons/default_weapon_scene.gd" id="1_vxqqy"]
+[ext_resource type="AnimationLibrary" uid="uid://djvnfepbl8c4e" path="res://scenes/player/weapon/weapons/weapon_animations.tres" id="2_t130n"]
+[ext_resource type="PackedScene" uid="uid://snp20w8w0e1s" path="res://assets/kenney_blaster-kit_2.1/Models/GLB format/blaster-d.glb" id="4_t130n"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_ennbq"]
+angle_min = -720.0
+angle_max = 720.0
+gravity = Vector3(0, 0, 0)
+
+[sub_resource type="Gradient" id="Gradient_ennbq"]
+offsets = PackedFloat32Array(0, 0.7590909)
+colors = PackedColorArray(1, 1, 0, 1, 1, 1, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_jwyb7"]
+gradient = SubResource("Gradient_ennbq")
+fill = 2
+fill_from = Vector2(0.51282054, 0.508547)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jwyb7"]
+transparency = 1
+albedo_color = Color(1, 1, 0, 1)
+albedo_texture = SubResource("GradientTexture2D_jwyb7")
+emission_enabled = true
+emission = Color(1, 1, 0, 1)
+emission_operator = 1
+emission_texture = SubResource("GradientTexture2D_jwyb7")
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_o1a5k"]
+material = SubResource("StandardMaterial3D_jwyb7")
+size = Vector2(0.15, 0.15)
+
+[node name="WeaponModel" type="Node3D"]
+transform = Transform3D(0.99999994, -9.313226e-10, 3.7252903e-09, -9.313226e-10, 1, 0, 0, 0, 0.99999994, 0, 0, 0)
+script = ExtResource("1_vxqqy")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(0.9999997, 1.8626451e-09, -7.450581e-09, -3.7252903e-09, 1.0000002, -2.9802322e-08, 3.7252903e-09, 5.9604645e-08, 0.99999946, 0.06781903, 0.06392848, -0.33633938)
+visible = false
+light_color = Color(1, 1, 0, 1)
+light_energy = 2.0
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+transform = Transform3D(0.9999996, -1.8626451e-09, 7.450581e-09, -2.7939677e-09, 1.0000001, 2.9802322e-08, 3.7252903e-09, 8.940697e-08, 0.9999997, 0.062004104, 0.064579226, -0.32063675)
+emitting = false
+lifetime = 0.05
+one_shot = true
+explosiveness = 0.78
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_ennbq")
+draw_pass_1 = SubResource("QuadMesh_o1a5k")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": ExtResource("2_t130n")
+}
+
+[node name="Model" parent="." instance=ExtResource("4_t130n")]

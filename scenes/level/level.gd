@@ -7,11 +7,15 @@ extends Node3D
 var is_free_camera: bool = false :
 	set(new_value):
 		is_free_camera = new_value
-		if player:
-			player.movement_enabled = !is_free_camera
+		if player_camera:
 			free_camera.movement_enabled = is_free_camera
 			free_camera.global_transform = player_camera.global_transform
 			free_camera.current = is_free_camera
+			_update_player_movement_enabled()
+
+func _update_player_movement_enabled():
+	if player:
+		player.movement_enabled = !is_free_camera and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -24,3 +28,4 @@ func _input(event: InputEvent) -> void:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		else:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		_update_player_movement_enabled()
