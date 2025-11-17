@@ -17,6 +17,26 @@ const TURRET_PROJECTILE = preload("uid://563ue053bg5k")
 @onready var face: Node3D = %Face
 @onready var shoot_spawn_position: Marker3D = %ShootSpawnPosition
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
+@onready var field_of_view: Area3D = $FacePivot/Face/FieldOfView
+@onready var when_does_not_have_targeted_node_collision_shape: CollisionShape3D = $FacePivot/Face/FieldOfView/WhenDoesNotHaveTargetedNodeCollisionShape
+@onready var when_targeted_node_collision_shape: CollisionShape3D = $FacePivot/Face/FieldOfView/WhenTargetedNodeCollisionShape
+
+signal player_detected
+signal player_out_of_sight
+
+func _ready():
+	field_of_view.body_entered.connect(func(body):
+		targeted_node = body
+		when_does_not_have_targeted_node_collision_shape.set_deferred("disabled", true)
+		when_targeted_node_collision_shape.set_deferred("disabled", false)
+		player_detected.emit()
+	)
+	field_of_view.body_exited.connect(func(body):
+		targeted_node = null
+		when_does_not_have_targeted_node_collision_shape.set_deferred("disabled", false)
+		when_targeted_node_collision_shape.set_deferred("disabled", true)
+		player_out_of_sight.emit()
+	)
 
 ## Método auxiliar que rota un nodo para que mire a cierto punto.
 func _smoothed_look_at(node_to_rotate: Node3D, point_to_look_at: Vector3, weight: float) -> void:
@@ -26,8 +46,8 @@ func _smoothed_look_at(node_to_rotate: Node3D, point_to_look_at: Vector3, weight
 	var new_transform := Transform3D(Basis(new_quaternion), node_transform.origin)
 	node_to_rotate.global_transform = new_transform
 
-func _physics_process(delta: float) -> void:
-	look_at_target(delta)
+#func _physics_process(delta: float) -> void:
+	#look_at_target(delta)
 
 func switch_to_aggresive_mode_animation():
 	animation_player.play("switch_to_aggresive")
@@ -44,14 +64,22 @@ func look_at_target(delta: float):
 			for weapon in face.weapons:
 				_smoothed_look_at(weapon, point_to_look_at, 1 - pow(0.01, delta))
 
-## Comienza la animación de disparo y luego de un tiempo (configurado en [member attack_telegraph_time])
-## crea un proyectil que es lanzado en dirección a [member targeted_node]
+func is_target_locked_on() -> bool:
+	if targeted_node:
+		var targeted_node_position = targeted_node.global_position
+		var face_position = face.global_position
+		var direction_to_target = face_position.direction_to(targeted_node_position)
+		var angle = direction_to_target.angle_to(-face.global_basis.z)
+		return angle < deg_to_rad(5)
+	return false
+
 func shoot():
-	for weapon in face.weapons:
-		weapon.play_shoot_animation()
-	await get_tree().create_timer(attack_telegraph_time).timeout
 	var turret_projectile = TURRET_PROJECTILE.instantiate()
 	get_parent().add_child(turret_projectile)
 	turret_projectile.global_position = shoot_spawn_position.global_position
 	turret_projectile.direction = -face.global_basis.z
 	turret_projectile.speed = shoot_speed
+
+func play_charging_attack_animation():
+	for weapon in face.weapons:
+		weapon.play_shoot_animation()

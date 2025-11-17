@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://c1y8ubxu4xr77"]
+[gd_scene load_steps=41 format=3 uid="uid://c1y8ubxu4xr77"]
 
 [ext_resource type="Script" uid="uid://dtxrdsxtlalvq" path="res://scenes/enemies/turret.gd" id="1_oabpu"]
 [ext_resource type="Script" uid="uid://5i8wffquxux1" path="res://scenes/enemies/face.gd" id="2_wqsho"]
@@ -6,6 +6,11 @@
 [ext_resource type="PackedScene" uid="uid://dokgbuskthqii" path="res://assets/kenney_mini-dungeon/Models/GLB format/column.glb" id="4_ue2uv"]
 [ext_resource type="PackedScene" uid="uid://ct2gdpokelg1j" path="res://scenes/enemies/turret/eye.tscn" id="4_wqsho"]
 [ext_resource type="Script" uid="uid://c5r1q6bnlphxb" path="res://scenes/enemies/weapons_path.gd" id="5_0w8p4"]
+[ext_resource type="Script" uid="uid://c41q6r1f1xfm5" path="res://scenes/enemies/state_machine/states/idle.gd" id="7_0w8p4"]
+[ext_resource type="Script" uid="uid://h1hvq0g7oqiy" path="res://scenes/enemies/state_machine/state_machine.gd" id="7_d5tah"]
+[ext_resource type="Script" uid="uid://cbry2umrmsgkg" path="res://scenes/enemies/state_machine/states/tracking.gd" id="8_w2i2w"]
+[ext_resource type="Script" uid="uid://du830ao8xn0a2" path="res://scenes/enemies/state_machine/states/charging_attack.gd" id="10_kr03i"]
+[ext_resource type="Script" uid="uid://dkprs5vo74nti" path="res://scenes/enemies/state_machine/states/attacking.gd" id="11_0rpki"]
 
 [sub_resource type="Gradient" id="Gradient_oabpu"]
 offsets = PackedFloat32Array(0, 0.46067417, 1)
@@ -133,6 +138,12 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 8
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_d5tah"]
+data = PackedVector3Array(-0.8880267, -2.461792, -0.8880266, -1.2558594, -2.461792, -1.0979071e-07, 0, -2.461792, 0, -1.2558594, -2.461792, -1.0979071e-07, -0.8880267, -2.461792, -0.8880266, 0, 2.461792, 0, 1.4975972e-08, -2.461792, -1.2558594, -0.8880267, -2.461792, -0.8880266, 0, -2.461792, 0, -0.8880267, -2.461792, -0.8880266, 1.4975972e-08, -2.461792, -1.2558594, 0, 2.461792, 0, -1.2558594, -2.461792, -1.0979071e-07, -0.88802665, -2.461792, 0.88802665, 0, -2.461792, 0, -0.88802665, -2.461792, 0.88802665, -1.2558594, -2.461792, -1.0979071e-07, 0, 2.461792, 0, -0.88802665, -2.461792, 0.88802665, -5.4895356e-08, -2.461792, 1.2558594, 0, -2.461792, 0, -5.4895356e-08, -2.461792, 1.2558594, -0.88802665, -2.461792, 0.88802665, 0, 2.461792, 0, 0.88802654, -2.461792, -0.88802683, 1.4975972e-08, -2.461792, -1.2558594, 0, -2.461792, 0, 1.4975972e-08, -2.461792, -1.2558594, 0.88802654, -2.461792, -0.88802683, 0, 2.461792, 0, 1.2558594, -2.461792, 0, 0.88802654, -2.461792, -0.88802683, 0, -2.461792, 0, 0.88802654, -2.461792, -0.88802683, 1.2558594, -2.461792, 0, 0, 2.461792, 0, -5.4895356e-08, -2.461792, 1.2558594, 0.88802665, -2.461792, 0.88802665, 0, -2.461792, 0, 0.88802665, -2.461792, 0.88802665, -5.4895356e-08, -2.461792, 1.2558594, 0, 2.461792, 0, 0.88802665, -2.461792, 0.88802665, 1.2558594, -2.461792, 0, 0, -2.461792, 0, 1.2558594, -2.461792, 0, 0.88802665, -2.461792, 0.88802665, 0, 2.461792, 0)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_d5tah"]
+radius = 12.0
 
 [sub_resource type="Animation" id="Animation_oabpu"]
 length = 0.001
@@ -483,6 +494,7 @@ _data = {
 [node name="Turret" type="Node3D"]
 script = ExtResource("1_oabpu")
 weapons_track_target = true
+attack_telegraph_time = 0.5
 
 [node name="FacePivot" type="Node3D" parent="."]
 
@@ -548,36 +560,47 @@ script = ExtResource("5_0w8p4")
 speed = 0.3
 
 [node name="PathFollow3D" type="PathFollow3D" parent="FacePivot/Face/WeaponsPath"]
-transform = Transform3D(-4.0024446e-08, -0.95782006, 0.2873459, -2.512074e-08, -0.2873459, -0.95782006, 1, -4.555456e-08, -1.2560287e-08, -0.8404653, -0.19844894, 0)
-progress = 3.7277384
+transform = Transform3D(1.6065876e-08, -0.3162257, 0.94867706, -8.293652e-08, -0.94867706, -0.3162257, 1, -7.359954e-08, -4.1467988e-08, -0.4988345, -0.5837218, 0)
+progress = 3.1502016
 
 [node name="WeaponPosition" type="Marker3D" parent="FacePivot/Face/WeaponsPath/PathFollow3D"]
 
 [node name="PathFollow3D2" type="PathFollow3D" parent="FacePivot/Face/WeaponsPath"]
-transform = Transform3D(-4.371139e-08, -0.31622076, -0.94866234, 0, 0.94866234, -0.31622076, 1, -1.3822449e-08, -4.146735e-08, -0.44944814, 0.60018396, 0)
-progress = 4.7778068
+transform = Transform3D(-4.371139e-08, -0.95780414, -0.28734112, 0, 0.28734112, -0.95780414, 1, -4.1866947e-08, -1.2560079e-08, -0.8245661, 0.25144607, 0)
+progress = 4.2002683
 
 [node name="WeaponPosition" type="Marker3D" parent="FacePivot/Face/WeaponsPath/PathFollow3D2"]
 
 [node name="PathFollow3D3" type="PathFollow3D" parent="FacePivot/Face/WeaponsPath"]
-transform = Transform3D(-4.371139e-08, 0.31622422, -0.9486727, 0, 0.9486727, 0.31622422, 1, 1.38226e-08, -4.14678e-08, 0.5492765, 0.5669079, 0)
-progress = 0.57753754
+transform = Transform3D(-4.371139e-08, -0.31622428, -0.94867265, 0, 0.94867265, -0.31622428, 1, -1.3822603e-08, -4.1467796e-08, 0, 0.75, 0)
+progress = 5.250339
 
 [node name="WeaponPosition" type="Marker3D" parent="FacePivot/Face/WeaponsPath/PathFollow3D3"]
 
 [node name="PathFollow3D4" type="PathFollow3D" parent="FacePivot/Face/WeaponsPath"]
-transform = Transform3D(1.2744722e-07, 0.9578147, 0.28734428, -2.512074e-08, -0.28734428, 0.9578147, 1, -1.2928912e-07, -1.2560217e-08, 0.8085892, -0.3047026, 0)
-progress = 1.6276044
+transform = Transform3D(-4.371139e-08, 0.95781463, -0.28734425, 0, 0.28734425, 0.95781463, 1, 4.1867406e-08, -1.2560216e-08, 0.82456523, 0.25144917, 0)
+progress = 1.0500675
 
 [node name="WeaponPosition" type="Marker3D" parent="FacePivot/Face/WeaponsPath/PathFollow3D4"]
 
 [node name="PathFollow3D5" type="PathFollow3D" parent="FacePivot/Face/WeaponsPath"]
-transform = Transform3D(4.792736e-08, 0.04822453, 0.99882406, -8.732106e-08, -0.99882406, 0.04822453, 1, -8.952965e-08, -4.3659988e-08, -0.049655955, -0.7389367, 0)
-progress = 2.6776717
+transform = Transform3D(-1.0314341e-07, 0.3162238, 0.9486715, 8.293653e-08, -0.9486715, 0.3162238, 1, 1.11295925e-07, 7.162271e-08, 0.49883667, -0.5837211, 0)
+progress = 2.1001346
 
 [node name="WeaponPosition" type="Marker3D" parent="FacePivot/Face/WeaponsPath/PathFollow3D5"]
 
 [node name="Node3D" type="Node3D" parent="FacePivot/Face"]
+
+[node name="FieldOfView" type="Area3D" parent="FacePivot/Face"]
+collision_layer = 0
+
+[node name="WhenDoesNotHaveTargetedNodeCollisionShape" type="CollisionShape3D" parent="FacePivot/Face/FieldOfView"]
+transform = Transform3D(1, 0, 0, 0, -4.3711385e-08, -0.99999994, 0, 0.99999994, -4.3711385e-08, 0, 1.1920929e-07, -2.6996555)
+shape = SubResource("ConcavePolygonShape3D_d5tah")
+
+[node name="WhenTargetedNodeCollisionShape" type="CollisionShape3D" parent="FacePivot/Face/FieldOfView"]
+shape = SubResource("SphereShape3D_d5tah")
+disabled = true
 
 [node name="Body" type="Node3D" parent="."]
 
@@ -591,3 +614,19 @@ autoplay = "idle"
 playback_auto_capture_duration = 1.0
 playback_auto_capture_ease_type = 2
 playback_default_blend_time = 0.5
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("agent")]
+script = ExtResource("7_d5tah")
+agent = NodePath("..")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("7_0w8p4")
+
+[node name="Tracking" type="Node" parent="StateMachine"]
+script = ExtResource("8_w2i2w")
+
+[node name="ChargingAttack" type="Node" parent="StateMachine"]
+script = ExtResource("10_kr03i")
+
+[node name="Attacking" type="Node" parent="StateMachine"]
+script = ExtResource("11_0rpki")
